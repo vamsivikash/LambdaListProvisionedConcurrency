@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Serverless Specification template describing your function.
+Resources:
+  ListFunctionsWithPC:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: ListFunctionsWithPC
+      Description: ''
+      Handler: index.handler
+      MemorySize: 10240
+      Role: 'arn:aws:iam::395779696292:role/LambdaAdmin'
+      Runtime: nodejs12.x
+      Timeout: 10
