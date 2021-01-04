@@ -1,6 +1,5 @@
 const AWS = require('aws-sdk');
 const lambda = new AWS.Lambda();
-const PDF = require('./generatePDF');
 const {getPCList, exitFunction} = require('./ProvisionedConcurrency');
 const {getRCList} = require('./ReservedConcurrency');
 const {writeToS3} = require('./writeToS3');
@@ -49,47 +48,44 @@ exports.handler = async (event) => {
     
     // Retrying 3 times with a delay of 30 seconds between the calls 
     do{
-        let config_retry = await getPCList(result);
+        let PC_Data = await getPCList(result);
         
-        if(config_retry[1].size > 0){
+        if(PC_Data[1].size > 0){
             // Copy the retry list to the result array 
             await wait(RETRY_WAIT);
             
             result = [];
-            result = [...config_retry[1]];
+            result = [...PC_Data[1]];
             ++p;
         }
         else{
-            console.log("PC LIST IS ", config_retry[0]);
+            console.log("PC LIST IS ", PC_Data[0]);
             break;
         }
     }while(p < RETRY_COUNT);
     
-        
-    await PDF.generatePDF();
-    await writeToS3();
-    await exitFunction(); 
-    
-    // Reserved Concurrency in progress 
+    // Reserved Concurrency 
     
     // Retrying 3 times with a delay of 30 seconds between the calls 
     do{
-        let config_retry = await getRCList(result);
+        let RC_Data = await getRCList(result);
         
-        if(config_retry[1].size > 0){
+        if(RC_Data[1].size > 0){
             // Copy the retry list to the result array 
             await wait(RETRY_WAIT);
             
             result = [];
-            result = [...config_retry[1]];
+            result = [...RC_Data[1]];
             ++r;
         }
         else{
-            console.log("RC List is ", config_retry[0]);
+            console.log("RC List is ", RC_Data[0]);
             break;
         }
     }while(r < RETRY_COUNT);
     
+    await exitFunction(); 
+
     const response = {
         statusCode: 200,
         body: JSON.stringify('Hello from Lambda!'),
