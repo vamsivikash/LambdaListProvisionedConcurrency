@@ -42,7 +42,7 @@ async function listFunctions(){
 const wait = ms => new Promise((resolve) => setTimeout(resolve, ms));
 
 exports.handler = async (event) => {
-     let p = 0, r =0;
+    let p_cnt = 0, r_cnt =0;
     let result = await listFunctions();
     console.log("# of FUNCTIONS - ", result.length);
     
@@ -56,13 +56,13 @@ exports.handler = async (event) => {
             
             result = [];
             result = [...PC_Data[1]];
-            ++p;
+            ++p_cnt;
         }
         else{
             console.log("PC LIST IS ", PC_Data[0]);
             break;
         }
-    }while(p < RETRY_COUNT);
+    }while(p_cnt < RETRY_COUNT);
     
     // Reserved Concurrency 
     
@@ -71,18 +71,18 @@ exports.handler = async (event) => {
         let RC_Data = await getRCList(result);
         
         if(RC_Data[1].size > 0){
-            // Copy the retry list to the result array 
+            // Wait for 30 seconds before retry 
             await wait(RETRY_WAIT);
             
             result = [];
             result = [...RC_Data[1]];
-            ++r;
+            ++r_cnt;
         }
         else{
             console.log("RC List is ", RC_Data[0]);
             break;
         }
-    }while(r < RETRY_COUNT);
+    }while(r_cnt < RETRY_COUNT);
     
     await exitFunction(); 
 
