@@ -15,42 +15,25 @@ zip -r lambdaPC *
 
 For the script to run, the function's execution role needs the GET and READ permissions:
 
-NOTE: 
+NOTE: Additional permissions are required to write to CloudWatch logs
 
 ```
-{
-            "Sid": "123",
+        {
+            "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
-                "lambda:ListFunctions",
-                "lambda:ListVersionsByFunction",
-                "lambda:GetLayerVersion",
-                "lambda:GetEventSourceMapping",
-                "lambda:GetFunction",
-                "lambda:ListAliases",
-                "lambda:GetAccountSettings",
-                "lambda:GetFunctionConfiguration",
-                "lambda:GetLayerVersionPolicy",
-                "lambda:GetFunctionCodeSigningConfig",
-                "lambda:ListFunctionEventInvokeConfigs",
                 "lambda:ListProvisionedConcurrencyConfigs",
-                "lambda:GetProvisionedConcurrencyConfig",
-                "lambda:ListFunctionsByCodeSigningConfig",
-                "lambda:GetFunctionConcurrency",
-                "lambda:ListTags",
-                "lambda:GetFunctionEventInvokeConfig",
-                "lambda:ListEventSourceMappings",
-                "lambda:ListLayerVersions",
-                "lambda:ListLayers",
-                "lambda:GetCodeSigningConfig",
-                "lambda:ListCodeSigningConfigs",
-                "lambda:GetAlias",
-                "lambda:GetPolicy"
+                "lambda:ListFunctions",
+                "lambda:GetFunctionConcurrency"
             ],
             "Resource": "*"
-        },
-
+        }
 ```
+
+### Configuration
+
+Memory: 512 MB
+Timeout: 15 seconds
 
 ### References: 
 
