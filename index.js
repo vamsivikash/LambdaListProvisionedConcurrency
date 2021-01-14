@@ -2,42 +2,80 @@ const AWS = require('aws-sdk');
 const lambda = new AWS.Lambda();
 const {getPCList, exitFunction} = require('./ProvisionedConcurrency');
 const {getRCList} = require('./ReservedConcurrency');
-const {writeToS3} = require('./writeToS3');
 const RETRY_COUNT = 3; 
 const RETRY_WAIT = 30000;
+const { LambdaClient, ListFunctionsCommand } = require("@aws-sdk/client-lambda");
 
-async function listFunctions(){
-    let hasMoreFunctions = true; 
-    let next_marker;
-    let FunctionNamesList = [];
+// List functions using AWS SDK V2
+
+// async function listFunctions(){
+//     let hasMoreFunctions = true; 
+//     let next_marker;
+//     let FunctionNamesList = [];
     
-    while(hasMoreFunctions){
-        let params = {};
-        if(next_marker) params.Marker = next_marker;
+//     while(hasMoreFunctions){
+//         let params = {};
+//         if(next_marker) params.Marker = next_marker;
         
-        try{
-            let data = await lambda.listFunctions(params).promise();
-            data.Functions.map(functionInfo => FunctionNamesList.push(functionInfo.FunctionName));
+//         try{
+//             let data = await lambda.listFunctions(params).promise();
+//             data.Functions.map(functionInfo => FunctionNamesList.push(functionInfo.FunctionName));
             
-            if(data.Functions.length == 50){
-                hasMoreFunctions = true;
-                next_marker = data.NextMarker; 
-            }
-            else{
-                hasMoreFunctions = false;
-            }
-        }
-        catch(err){
-            throw err;
-        }
-    }    
+//             if(data.Functions.length == 50){
+//                 hasMoreFunctions = true;
+//                 next_marker = data.NextMarker; 
+//             }
+//             else{
+//                 hasMoreFunctions = false;
+//             }
+//         }
+//         catch(err){
+//             throw err;
+//         }
+//     }    
     
-    return new Promise((resolve, reject) => {
-        (FunctionNamesList.length > 0)? 
-            resolve(FunctionNamesList):
-            reject("No Functions available in this region");
+//     return new Promise((resolve, reject) => {
+//         (FunctionNamesList.length > 0)? 
+//             resolve(FunctionNamesList):
+//             reject("No Functions available in this region");
+//     });
+// }
+
+
+// List Functions using AWS SDK V3
+
+function listFunctions(){
+    let FunctionNamesList = [];
+    let next_marker;
+    
+    return new Promise( (resolve, reject) => {
+        (async() => {
+            const client = new LambdaClient();
+            let params = {};
+            const command = new ListFunctionsCommand(params);
+            do{
+                try{
+                    const results = await client.send(command);
+                    results.Functions.map((functionInfo) => {
+                        FunctionNamesList.push(functionInfo.FunctionName);
+                    });
+                    if(results.NextMarker){
+                        params.Marker = results.NextMarker;
+                        next_marker = true;    
+                    }
+                    else
+                        next_marker = false;
+                }
+                catch(err){
+                    console.error(err);
+                    reject(err);
+                }    
+            }while(next_marker);
+            resolve(functionList);
+        })();
     });
 }
+
 
 const wait = ms => new Promise((resolve) => setTimeout(resolve, ms));
 
