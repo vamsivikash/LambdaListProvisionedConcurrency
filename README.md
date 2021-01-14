@@ -33,7 +33,7 @@ NOTE: Additional permissions are required to write to CloudWatch logs
 ### Configuration
 
 Memory: 512 MB
-Timeout: 15 seconds
+Timeout: 3 minutes
 
 ### References: 
 
