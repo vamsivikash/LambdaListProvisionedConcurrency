@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.2.0",
     "fs": "0.0.1-security"
   }
 }
