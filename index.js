@@ -71,11 +71,10 @@ function listFunctions(){
                     reject(err);
                 }    
             }while(next_marker);
-            resolve(functionList);
+            resolve(FunctionNamesList);
         })();
     });
 }
-
 
 const wait = ms => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -84,10 +83,14 @@ exports.handler = async (event) => {
     let result = await listFunctions();
     console.log("# of FUNCTIONS - ", result.length);
     
+    console.log("\n#########\n PC LIST \n#########\n");
     // Retrying 3 times with a delay of 30 seconds between the calls 
     do{
         let PC_Data = await getPCList(result);
-        
+        if(PC_Data[0].length > 0){
+            console.log(PC_Data[0]);
+        }
+
         if(PC_Data[1].size > 0){
             // Copy the retry list to the result array 
             await wait(RETRY_WAIT);
@@ -97,27 +100,27 @@ exports.handler = async (event) => {
             ++p_cnt;
         }
         else{
-            console.log("PC LIST IS ", PC_Data[0]);
             break;
         }
     }while(p_cnt < RETRY_COUNT);
     
     // Reserved Concurrency 
-    
+    console.log("\n#########\n RC LIST \n#########\n");
     // Retrying 3 times with a delay of 30 seconds between the calls 
     do{
         let RC_Data = await getRCList(result);
+        if(RC_Data[0].length > 0){
+            console.log(RC_Data[0]);
+        }
         
         if(RC_Data[1].size > 0){
             // Wait for 30 seconds before retry 
             await wait(RETRY_WAIT);
-            
             result = [];
             result = [...RC_Data[1]];
             ++r_cnt;
         }
         else{
-            console.log("RC List is ", RC_Data[0]);
             break;
         }
     }while(r_cnt < RETRY_COUNT);

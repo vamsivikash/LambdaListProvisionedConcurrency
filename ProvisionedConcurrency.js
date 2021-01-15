@@ -18,7 +18,7 @@ function getProvisionedConcurrencyConfig(functionName){
         
         lambda.listProvisionedConcurrencyConfigs(provision_params, function(err, data){
             if(err){
-                console.log("ERROR - FUNCTION NAME ", functionName);
+                //console.log("ERROR - FUNCTION NAME ", functionName);
                 result = {
                     "data":null,
                     "retry":true
@@ -27,7 +27,7 @@ function getProvisionedConcurrencyConfig(functionName){
             }
             else{
                 let info = ++func_cnt + ". Function: " + functionName;
-                console.log(info);
+                //console.log(info);
                 if(data.ProvisionedConcurrencyConfigs.length > 0){
                     result= {
                         "data": data.ProvisionedConcurrencyConfigs
@@ -68,11 +68,11 @@ async function getPCList(result){
             }
         });
     }));
-    writeStream.end();
     return [PCList, PCRetryList];
 }
 
 function exitFunction(){
+    writeStream.end();
     func_cnt = 0; 
 }
 

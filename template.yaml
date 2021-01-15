@@ -1,14 +1,44 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: An AWS Serverless Specification template describing your function.
+Description: Sample Function to list functions with PC
 Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns: 
+        - "arn:aws:iam::aws:policy/AWSLambdaExecute"
+      Policies: 
+        - PolicyName: lambdaAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - lambda:ListProvisionedConcurrencyConfigs
+              - lambda:ListFunctions
+              - lambda:GetFunctionConcurrency
+              Resource: '*'
+
   ListFunctionsWithPC:
     Type: 'AWS::Serverless::Function'
+    DependsOn: LambdaRole
     Properties:
       FunctionName: ListFunctionsWithPC
-      Description: ''
+      Description: 'List the functions with PC'
+      CodeUri: .
       Handler: index.handler
-      MemorySize: 10240
-      Role: 'arn:aws:iam::395779696292:role/LambdaAdmin'
+      MemorySize: 512
+      Role: 
+        Fn::GetAtt: [ LambdaRole , "Arn" ]
       Runtime: nodejs12.x
-      Timeout: 10
+      Timeout: 300
